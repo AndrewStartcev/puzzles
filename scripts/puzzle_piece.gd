@@ -80,7 +80,7 @@ func place_scrambled(at_position: Vector2) -> void:
 	set_process_input(false)
 
 
-func _on_area_input_event(viewport: Node, event: InputEvent, _shape_idx: int) -> void:
+func _on_area_input_event(viewport, event: InputEvent, _shape_idx: int) -> void:
 	if locked:
 		return
 
@@ -100,7 +100,7 @@ func _start_drag(pointer_position: Vector2, touch_index: int) -> void:
 	_drag_offset = global_position - pointer_position
 	z_index = 1000
 	if is_instance_valid(_visual):
-		_visual.modulate = Color(1.06, 1.06, 1.06, 1.0)
+		_visual.modulate = Color(1.0, 1.0, 1.0, 1.0)
 	set_process_input(true)
 
 
