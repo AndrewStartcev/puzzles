@@ -79,7 +79,7 @@ func _build_game(texture: Texture2D, puzzle_path: String) -> void:
 
 	var image_aspect := image_size.x / image_size.y
 	var max_board_size := Vector2(screen_size.x * 0.54, screen_size.y * 0.70)
-	_board_size.x = min(max_board_size.x, max_board_size.y * image_aspect)
+	_board_size.x = minf(max_board_size.x, max_board_size.y * image_aspect)
 	_board_size.y = _board_size.x / image_aspect
 	_display_scale = _board_size.x / image_size.x
 	_board_origin = Vector2(
@@ -252,9 +252,9 @@ func _build_piece_polygon(
 	bottom_type: int,
 	left_type: int
 ) -> PackedVector2Array:
-	var width := cell_size.x
-	var height := cell_size.y
-	var tab_depth := min(width, height) * 0.18
+	var width: float = cell_size.x
+	var height: float = cell_size.y
+	var tab_depth: float = minf(width, height) * 0.18
 	var points := PackedVector2Array()
 
 	points.append_array(_sample_edge(
@@ -338,11 +338,11 @@ func _tab_profile(t: float) -> float:
 
 func _random_scatter_position(target: Vector2) -> Vector2:
 	var screen_size := get_viewport_rect().size
-	var margin := 28.0
-	var top_margin := 96.0
+	var margin: float = 28.0
+	var top_margin: float = 96.0
 	var piece_size := _cell_display_size + Vector2(20.0, 20.0)
-	var max_x := max(margin, screen_size.x - piece_size.x - margin)
-	var max_y := max(top_margin, screen_size.y - piece_size.y - margin)
+	var max_x: float = maxf(margin, screen_size.x - piece_size.x - margin)
+	var max_y: float = maxf(top_margin, screen_size.y - piece_size.y - margin)
 	var board_rect := Rect2(_board_origin, _board_size).grow(14.0)
 
 	for _attempt in range(80):
