@@ -1,9 +1,11 @@
-# Пазлы — Design Document
+# Мир пазлов — Design Document
 
 **Статус:** рабочий дизайн-документ  
-**Платформа:** HTML5 / Godot 4  
+**Платформа:** Vite + React + TypeScript + PixiJS/WebGL; Пикабу Игры, VK Mini Apps/игры, Одноклассники
 **Основной сценарий:** desktop/web, адаптация под мобильные экраны  
-**Версия документа:** 0.1
+**Версия документа:** 0.2
+
+Документ описывает целевой продукт, включая будущие возможности. Реализованный scope ядра и UI перечислен в README. Архитектура и ограничения — в TECH_DECISION_WEB.md. Старый Godot-прототип удалён; его история доступна в Git. Яндекс Игры не поддерживаются.
 
 ---
 
@@ -671,7 +673,7 @@ Desktop:
 {
   "id": "nature_001",
   "title": "Домик у горного озера",
-  "image": "res://assets/puzzles/nature/nature_001.webp",
+  "image": "assets/puzzles/nature/nature_001.webp",
   "collection": "nature",
   "tags": ["mountains", "lake", "forest"],
   "premium": false,

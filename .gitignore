@@ -1,8 +1,11 @@
-.godot/
-.export/
-export.cfg
-*.tmp
+node_modules/
+dist/
+test-results/
+playwright-report/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+*.local
 .DS_Store
 Thumbs.db
-*.uid
-*.import
