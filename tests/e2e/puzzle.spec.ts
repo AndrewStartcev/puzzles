@@ -2,13 +2,29 @@ import { expect, test } from "@playwright/test";
 test("plays, saves, resumes and completes a puzzle", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
+  await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto("/");
-  await expect(
-    page.getByRole("heading", { name: /Соберите свой/ }),
-  ).toBeVisible();
+  await expect(page.locator(".game-title")).toBeVisible();
+  await expect(page.locator(".table-puzzle")).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollHeight <= innerHeight,
+    ),
+  ).toBe(true);
   await page.screenshot({ path: "test-results/home.png", fullPage: true });
-  await page.getByRole("button", { name: "Начать путешествие" }).click();
+  await page.getByRole("button", { name: "Коллекции", exact: true }).click();
+  await page.screenshot({ path: "test-results/collections.png" });
+  await page.getByRole("button", { name: "Главное меню" }).click();
+  await page.getByRole("button", { name: "Настройки", exact: true }).click();
+  await page.screenshot({ path: "test-results/settings.png" });
+  await page.getByRole("button", { name: "Всё понятно" }).click();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({ path: "test-results/home-mobile.png" });
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.screenshot({ path: "test-results/home-720.png" });
+  await page.getByRole("button", { name: "Играть", exact: true }).click();
   await page.getByRole("button", { name: "12 деталей", exact: true }).click();
+  await page.screenshot({ path: "test-results/difficulty.png" });
   await page.getByRole("button", { name: "Собирать пазл" }).click();
   await expect(page.locator("canvas")).toBeVisible();
   await expect(page.getByText("Сохранено на устройстве")).toBeVisible();
@@ -72,7 +88,7 @@ test("opens ~3000 pieces with a virtual tray and camera controls", async ({
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/");
-  await page.getByRole("button", { name: "Начать путешествие" }).click();
+  await page.getByRole("button", { name: "Играть", exact: true }).click();
   await page
     .getByRole("button", { name: "~3000 деталей", exact: true })
     .click();
@@ -123,7 +139,7 @@ test("opens ~3000 pieces with a virtual tray and camera controls", async ({
   await stress.screenshot({ path: "test-results/full-table.png" });
   await stress.getByRole("button", { name: "Увеличить" }).click();
   await stress
-    .getByRole("button", { name: "← Коллекции", exact: true })
+    .getByRole("button", { name: "← Меню", exact: true })
     .click();
   expect(errors).toEqual([]);
 });

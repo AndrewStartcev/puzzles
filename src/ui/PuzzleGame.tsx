@@ -168,7 +168,7 @@ export function PuzzleGame({
             back();
           }}
         >
-          ← Коллекции
+          ← Меню
         </button>
         <div>
           <h2>{request.content.title}</h2>
@@ -222,7 +222,7 @@ export function PuzzleGame({
               <span>✦</span>
               <h2>Картина собрана!</h2>
               <p>Ещё одно открытие в вашем мире.</p>
-              <button onClick={back}>К коллекциям</button>
+              <button onClick={back}>В меню</button>
             </div>
           )}
         </div>
