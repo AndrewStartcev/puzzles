@@ -15,6 +15,7 @@
     "check": "npm run test && npm run build"
   },
   "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
     "@vkontakte/vk-bridge": "^3.0.2",
     "earcut": "^3.0.2",
     "pixi.js": "^8.20.1",

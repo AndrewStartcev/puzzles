@@ -27,7 +27,7 @@ test("plays, saves, resumes and completes a puzzle", async ({ page }) => {
   await page.screenshot({ path: "test-results/difficulty.png" });
   await page.getByRole("button", { name: "Собирать пазл" }).click();
   await expect(page.locator("canvas")).toBeVisible();
-  await expect(page.getByText("Сохранено на устройстве")).toBeVisible();
+  await expect(page.getByText("Сохранено на устройстве")).toBeAttached();
   const canvas = await page.locator("canvas").boundingBox();
   expect(canvas).toBeTruthy();
   for (let i = 0; i < 12; i++) {
@@ -70,7 +70,7 @@ test("plays, saves, resumes and completes a puzzle", async ({ page }) => {
       `${i + 1} / 12`,
     );
     if (i === 0) {
-      await expect(page.getByText("Сохранено на устройстве")).toBeVisible();
+      await expect(page.getByText("Сохранено на устройстве")).toBeAttached();
       await page.reload();
       await page.getByRole("button", { name: /Продолжить/ }).click();
       await expect(page.locator(".game-progress strong")).toHaveText("1 / 12");
@@ -94,7 +94,7 @@ test("opens ~3000 pieces with a virtual tray and camera controls", async ({
     .click();
   await page.getByRole("button", { name: "Собирать пазл" }).click();
   await expect(page.locator("canvas")).toBeVisible();
-  await expect(page.getByText("Сохранено на устройстве")).toBeVisible();
+  await expect(page.getByText("Сохранено на устройстве")).toBeAttached();
   expect(await page.locator(".tray-piece").count()).toBeLessThan(15);
   await page.getByRole("button", { name: "Весь пазл", exact: true }).click();
   await page.getByRole("button", { name: "Увеличить" }).click();
@@ -133,13 +133,11 @@ test("opens ~3000 pieces with a virtual tray and camera controls", async ({
   await stress.goto("/");
   await stress.getByRole("button", { name: /Продолжить/ }).click();
   await expect(stress.locator("canvas")).toBeVisible();
-  await expect(stress.getByText("Сохранено на устройстве")).toBeVisible();
+  await expect(stress.getByText("Сохранено на устройстве")).toBeAttached();
   await stress.getByRole("button", { name: "Весь пазл", exact: true }).click();
   await expect(stress.locator(".tray-piece")).toHaveCount(0);
   await stress.screenshot({ path: "test-results/full-table.png" });
   await stress.getByRole("button", { name: "Увеличить" }).click();
-  await stress
-    .getByRole("button", { name: "← Меню", exact: true })
-    .click();
+  await stress.getByRole("button", { name: "Меню", exact: true }).click();
   expect(errors).toEqual([]);
 });

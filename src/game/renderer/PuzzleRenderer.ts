@@ -5,6 +5,7 @@ import {
   Graphics,
   Mesh,
   MeshGeometry,
+  NineSliceSprite,
   Sprite,
   type Texture,
 } from "pixi.js";
@@ -12,6 +13,8 @@ import { contains } from "../puzzle-core/geometry";
 import { PuzzleSession } from "../puzzle-core/session";
 import type { Camera, Point, PieceState } from "../puzzle-core/types";
 import { fitCamera, screenToWorld, zoomAt } from "../camera/camera";
+import { pieceLocal } from "../puzzle-core/rotation";
+import boardImage from "../../../assets/ui/puzzle-board.png";
 
 export class PuzzleRenderer {
   private app = new Application();
@@ -20,7 +23,17 @@ export class PuzzleRenderer {
   private texture!: Texture;
   private observer?: ResizeObserver;
   private abort = new AbortController();
-  private active?: { id: number; offset: Point; original: PieceState };
+  private active?: {
+    id: number;
+    offset: Point;
+    original: PieceState;
+    start: Point;
+    moved: boolean;
+    fromTray: boolean;
+  };
+  private guide?: Sprite;
+  private hintOpacity = 0.14;
+  private guideVisible = true;
   private pointers = new Map<number, Point>();
   private pan?: Point;
   private pinch?: { distance: number; centre: Point };
@@ -55,6 +68,20 @@ export class PuzzleRenderer {
     if (this.disposed) return;
     const g = this.session.geometry;
     this.app.stage.addChild(this.world);
+    const boardTexture = await Assets.load<Texture>(boardImage);
+    if (this.disposed) return;
+    const area = this.session.workspace;
+    const board = new NineSliceSprite({
+      texture: boardTexture,
+      leftWidth: 95,
+      rightWidth: 95,
+      topHeight: 85,
+      bottomHeight: 85,
+      width: area.width + 100,
+      height: area.height + 100,
+    });
+    board.position.set(area.x - 50, area.y - 50);
+    this.world.addChild(board);
     this.world.addChild(
       new Graphics()
         .roundRect(-8, -8, g.width + 16, g.height + 16, 10)
@@ -64,6 +91,7 @@ export class PuzzleRenderer {
     guide.width = g.width;
     guide.height = g.height;
     guide.alpha = 0.14;
+    this.guide = guide;
     this.world.addChild(guide);
     this.host.append(this.app.canvas);
     this.app.canvas.setAttribute("aria-label", "Игровое поле пазла");
@@ -95,6 +123,18 @@ export class PuzzleRenderer {
     );
   }
   private initialCamera() {
+    if (this.session.states.length <= 300) {
+      const area = this.session.workspace;
+      const camera = fitCamera(
+        this.host.clientWidth,
+        this.host.clientHeight,
+        area.width + 100,
+        area.height + 100,
+      );
+      camera.x -= (area.x - 50) * camera.zoom;
+      camera.y -= (area.y - 50) * camera.zoom;
+      return camera;
+    }
     const fit = fitCamera(
       this.host.clientWidth,
       this.host.clientHeight,
@@ -143,8 +183,9 @@ export class PuzzleRenderer {
           state = this.session.states[id];
         if (state.location !== "board") continue;
         const piece = this.session.geometry.pieces[id];
-        if (contains(piece.points, world.x - state.x, world.y - state.y)) {
-          this.startDrag(id, { x: world.x - state.x, y: world.y - state.y });
+        const local = pieceLocal(state, world, this.session.geometry);
+        if (contains(piece.points, local.x, local.y)) {
+          this.startDrag(id, { x: world.x - state.x, y: world.y - state.y }, p);
           return;
         }
       }
@@ -177,6 +218,9 @@ export class PuzzleRenderer {
       return;
     }
     if (this.active) {
+      if (Math.hypot(p.x - this.active.start.x, p.y - this.active.start.y) > 6)
+        this.active.moved = true;
+      if (!this.active.moved && !this.active.fromTray) return;
       const w = screenToWorld(this.camera, p),
         state = this.session.states[this.active.id];
       state.x = w.x - this.active.offset.x;
@@ -206,7 +250,10 @@ export class PuzzleRenderer {
       else {
         this.move(event);
         const state = this.session.states[id];
-        this.session.drop(id, state.x, state.y, this.camera.zoom);
+        if (!this.active!.moved && !this.active!.fromTray && state.rotatable) {
+          Object.assign(state, this.active!.original);
+          this.session.rotate(id);
+        } else this.session.drop(id, state.x, state.y, this.camera.zoom);
         this.active = undefined;
       }
     }
@@ -226,18 +273,30 @@ export class PuzzleRenderer {
       Object.assign(this.session.states[this.active.id], this.active.original);
     this.active = undefined;
   }
-  private startDrag(id: number, offset: Point) {
-    this.active = { id, offset, original: { ...this.session.states[id] } };
+  private startDrag(id: number, offset: Point, start: Point, fromTray = false) {
+    this.active = {
+      id,
+      offset,
+      original: { ...this.session.states[id] },
+      start,
+      moved: false,
+      fromTray,
+    };
     this.session.states[id].location = "board";
     this.order = this.order.filter((n) => n !== id);
     this.order.push(id);
   }
   takeFromTray(id: number, event: PointerEvent) {
     if (this.active || this.session.states[id].location !== "tray") return;
-    this.startDrag(id, {
-      x: this.session.geometry.cellWidth / 2,
-      y: this.session.geometry.cellHeight / 2,
-    });
+    this.startDrag(
+      id,
+      {
+        x: this.session.geometry.cellWidth / 2,
+        y: this.session.geometry.cellHeight / 2,
+      },
+      this.point(event),
+      true,
+    );
     this.move(event);
     this.sync();
   }
@@ -245,6 +304,40 @@ export class PuzzleRenderer {
     return this.session.states.map((p) => ({
       ...(this.active?.id === p.id ? this.active.original : p),
     }));
+  }
+  setHint(opacity: number, visible: boolean) {
+    this.hintOpacity = Math.max(0, Math.min(1, opacity));
+    this.guideVisible = visible;
+    if (this.guide) {
+      this.guide.alpha = this.hintOpacity;
+      this.guide.visible = visible;
+    }
+    this.changed();
+  }
+  getHint() {
+    return { hintOpacity: this.hintOpacity, guideVisible: this.guideVisible };
+  }
+  scatter() {
+    this.cancel();
+    this.session.scatter();
+    this.order = this.session.states
+      .filter((p) => p.location !== "tray")
+      .map((p) => p.id);
+    this.fitWorkspace();
+  }
+  fitWorkspace() {
+    const area = this.session.workspace;
+    const camera = fitCamera(
+      this.host.clientWidth,
+      this.host.clientHeight,
+      area.width + 100,
+      area.height + 100,
+    );
+    camera.x -= (area.x - 50) * camera.zoom;
+    camera.y -= (area.y - 50) * camera.zoom;
+    this.camera = camera;
+    this.sync();
+    this.changed();
   }
   fit() {
     this.camera = fitCamera(
@@ -312,7 +405,11 @@ export class PuzzleRenderer {
         mesh = this.mesh(id);
         this.meshes.set(id, mesh);
       }
-      mesh.position.set(p.x, p.y);
+      const cx = this.session.geometry.cellWidth / 2,
+        cy = this.session.geometry.cellHeight / 2;
+      mesh.pivot.set(cx, cy);
+      mesh.position.set(p.x + cx, p.y + cy);
+      mesh.rotation = ((p.rotation ?? 0) * Math.PI) / 2;
       this.world.addChild(mesh);
     }
     for (const [id, mesh] of this.meshes)

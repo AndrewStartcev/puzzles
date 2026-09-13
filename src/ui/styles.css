@@ -141,6 +141,9 @@ button svg {
   letter-spacing: 2px;
   font-weight: 800;
   color: #77755f;
+  background: #fff9ecd9;
+  border-radius: 13px;
+  padding: 4px 13px 4px 5px;
 }
 .brand-token {
   display: grid;
@@ -723,6 +726,13 @@ button svg {
   margin: 0 0 5px;
   color: #526661;
 }
+.game-header > div:not(.game-progress) {
+  background: #fff9eceb;
+  padding: 9px 14px;
+  border-radius: 12px;
+  box-shadow: 0 3px 12px #62543912;
+  min-width: 0;
+}
 .game-header small {
   font-size: 10px;
   color: #8d927f;
@@ -743,7 +753,10 @@ button svg {
 }
 .game-progress span {
   font-size: 12px;
-  color: #89917d;
+  color: #526661;
+  background: #fff9eceb;
+  padding: 7px;
+  border-radius: 8px;
 }
 .workspace {
   display: flex;
@@ -1305,5 +1318,406 @@ button svg {
 @media (prefers-reduced-motion: reduce) {
   button {
     transition: none;
+  }
+}
+
+/* Separate painted environment, removable board, and controls. */
+.tabletop {
+  padding: 20px 4.5vw 4vh;
+  background: #f6f0df url("../../assets/ui/room-background.png") center/cover
+    no-repeat;
+}
+.desk-light {
+  background: linear-gradient(125deg, #fff8e516, transparent 55%);
+  box-shadow: none;
+}
+.felt-table {
+  background: transparent url("../../assets/ui/puzzle-board.png") center/100%
+    100% no-repeat;
+  border: 0;
+  border-radius: 0;
+  box-shadow: 0 14px 22px #5c54321a;
+  padding: 6% 7%;
+}
+.mat-stitch {
+  display: none;
+}
+.game {
+  padding: 16px 3.5vw 22px;
+  gap: 12px;
+  background: #f6f0df url("../../assets/ui/room-background.png") center/cover
+    no-repeat;
+}
+.board-wrap {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+  overflow: hidden;
+}
+button {
+  border-color: #dcd5c3;
+  background:
+    radial-gradient(ellipse at 40% 0%, #fff 0%, #fff0 75%),
+    linear-gradient(150deg, #fffdf4, #eee7d8);
+  box-shadow:
+    0 3px 0 #c7bba3,
+    0 6px 9px #51473216,
+    inset 0 0 0 1px #fffcf1;
+  font-weight: 700;
+}
+button:hover {
+  filter: brightness(1.025);
+  box-shadow:
+    0 4px 0 #c7bba3,
+    0 8px 14px #5147321c;
+  transform: translateY(-1px);
+}
+button:active {
+  transform: translateY(2px);
+  box-shadow:
+    0 1px 0 #c7bba3,
+    0 2px 4px #51473216;
+}
+.primary,
+.completion button {
+  background:
+    radial-gradient(ellipse at 35% 0%, #d9f4fa66, transparent 75%),
+    linear-gradient(150deg, #86b6c7, #568798);
+  border-color: #6897a8;
+  box-shadow:
+    0 4px 0 #497486,
+    0 8px 12px #4c6a7328,
+    inset 0 0 0 1px #b7d9e35c;
+  color: #fff;
+}
+.primary:hover,
+.completion button:hover {
+  box-shadow:
+    0 5px 0 #497486,
+    0 10px 16px #4c6a7328,
+    inset 0 0 0 1px #b7d9e35c;
+}
+.menu-button {
+  border-radius: 18px;
+  padding: 15px 22px;
+  gap: 18px;
+}
+.menu-button .button-symbol {
+  padding: 8px;
+  border-radius: 12px;
+  background: #788b8212;
+  min-width: 43px;
+  color: #728e86;
+  opacity: 1;
+}
+.menu-button.primary .button-symbol {
+  background: #f5fbfb22;
+  color: #fff;
+}
+.button-arrow {
+  opacity: 0.6;
+}
+.game-icon {
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+.mini-brand .game-icon {
+  width: 27px;
+  height: 27px;
+}
+.menu-button .game-icon {
+  width: 25px;
+  height: 25px;
+}
+.round-button .game-icon {
+  width: 22px;
+  height: 22px;
+}
+.card-piece-count .game-icon {
+  width: 13px;
+  height: 13px;
+}
+.card-play .game-icon {
+  width: 19px;
+  height: 19px;
+}
+.table-puzzle {
+  height: auto;
+}
+.featured-puzzle,
+.featured-puzzle:hover,
+.featured-puzzle:active {
+  background: transparent;
+  box-shadow: none;
+  border: 0;
+}
+.board-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 0 12px 6px;
+}
+.board-toolbar button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-size: 12px;
+  padding: 12px 18px;
+  border-radius: 13px;
+  min-height: 44px;
+}
+.board-toolbar button .game-icon {
+  width: 20px;
+  height: 20px;
+  color: #7c9c96;
+}
+.hint-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  background: #fffbefdf;
+  border: 1px solid #e6dcc4;
+  border-radius: 13px;
+  box-shadow: 0 2px 0 #d5c7ae;
+  font-size: 11px;
+  color: #8a9585;
+}
+.hint-control input {
+  width: 115px;
+  accent-color: #699aa8;
+  cursor: pointer;
+}
+.hint-control output {
+  min-width: 30px;
+  font-size: 10px;
+  text-align: right;
+  color: #758a84;
+}
+.game-header > .subtle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.camera-controls button {
+  display: grid;
+  place-items: center;
+  min-width: 35px;
+}
+.edge-filter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.edge-filter .game-icon {
+  width: 14px;
+  height: 14px;
+}
+.edge-filter input {
+  margin: 0 3px 0 0;
+}
+.completion > span {
+  display: flex;
+  justify-content: center;
+}
+.completion > span > .game-icon {
+  height: 46px;
+  width: 46px;
+  color: #bca166;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.save-error {
+  position: absolute;
+  top: 12px;
+  left: 25%;
+  right: 25%;
+  background: #ffefcf;
+  color: #7f674b;
+  padding: 12px;
+  border-radius: 12px;
+  z-index: 20;
+  font-size: 12px;
+  text-align: center;
+}
+.reference-sheet {
+  position: relative;
+  width: min(1050px, 90vw);
+  max-height: 90dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+  background: #fff9ec;
+  border: 4px solid #fffdf5;
+  border-radius: 17px;
+  box-shadow:
+    0 8px 0 #b9b29b,
+    0 25px 65px #42584745;
+}
+.reference-sheet > .round-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1;
+}
+.reference-sheet img {
+  display: block;
+  max-width: 100%;
+  min-height: 0;
+  max-height: 76dvh;
+  object-fit: contain;
+  border-radius: 6px;
+}
+.reference-sheet h2 {
+  font-size: 15px;
+  margin: 17px 0 2px;
+  color: #7d887a;
+}
+@media (min-width: 1600px) {
+  .felt-table {
+    padding: 5% 9%;
+  }
+  .menu-button {
+    min-height: 78px;
+  }
+  .game {
+    padding: 20px 4vw 25px;
+  }
+}
+@media (max-height: 760px) and (min-width: 801px) {
+  .tabletop {
+    padding: 15px 4vw 25px;
+  }
+  .felt-table {
+    padding: 4% 7%;
+  }
+  .menu-button {
+    padding: 9px 18px;
+  }
+  .game {
+    padding: 10px 3vw 14px;
+    gap: 9px;
+  }
+  .board-toolbar {
+    padding-bottom: 4px;
+    gap: 10px;
+  }
+  .board-toolbar button {
+    padding: 9px 12px;
+    min-height: 38px;
+    font-size: 11px;
+  }
+  .hint-control {
+    padding: 9px 12px;
+  }
+}
+@media (max-width: 800px) {
+  .tabletop {
+    padding: 14px 14px 22px;
+  }
+  .felt-table {
+    padding: 35px 27px;
+  }
+  .menu-button {
+    padding: 9px 15px;
+    gap: 13px;
+  }
+  .menu-button .button-symbol {
+    padding: 5px;
+    min-width: 34px;
+    border-radius: 9px;
+  }
+  .menu-button .game-icon {
+    width: 23px;
+    height: 23px;
+  }
+  .game {
+    padding: 7px 8px 12px;
+    gap: 8px;
+  }
+  .board-toolbar {
+    gap: 8px;
+    padding: 0 4px 2px;
+    justify-content: space-between;
+  }
+  .board-toolbar button {
+    padding: 9px 10px;
+    flex: 1;
+    font-size: 10px;
+    min-height: 36px;
+    gap: 6px;
+  }
+  .board-toolbar button .game-icon {
+    width: 17px;
+    height: 17px;
+  }
+  .hint-control {
+    width: 100%;
+    padding: 8px 11px;
+    font-size: 10px;
+    gap: 8px;
+  }
+  .hint-control input {
+    flex: 1;
+    width: 80px;
+  }
+  .game-header > .subtle {
+    padding: 8px;
+    font-size: 9px;
+    gap: 4px;
+  }
+  .game-header > .subtle .game-icon {
+    width: 17px;
+    height: 17px;
+  }
+  .reference-sheet {
+    width: 95vw;
+    padding: 13px;
+    border-width: 3px;
+  }
+  .reference-sheet img {
+    max-height: 75dvh;
+  }
+  .reference-sheet h2 {
+    font-size: 12px;
+  }
+  .edge-filter {
+    padding: 0 7px 13px;
+    gap: 3px;
+    font-size: 8px;
+  }
+  .edge-filter .game-icon {
+    display: none;
+  }
+  .camera-controls {
+    gap: 4px;
+    bottom: 10px;
+  }
+  .camera-controls button {
+    padding: 8px;
+    min-width: 28px;
+  }
+  .camera-controls button .game-icon {
+    width: 15px;
+    height: 15px;
+  }
+  .save-error {
+    left: 15px;
+    right: 15px;
+    font-size: 10px;
   }
 }

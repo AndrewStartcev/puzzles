@@ -35,6 +35,8 @@ export interface PuzzleGeometry {
 export interface PieceState extends Point {
   id: number;
   location: "tray" | "board" | "placed";
+  rotation?: number;
+  rotatable?: boolean;
 }
 export interface SaveGame {
   version: 1;
@@ -44,4 +46,6 @@ export interface SaveGame {
   pieces: PieceState[];
   elapsedSeconds: number;
   updatedAt: number;
+  hintOpacity?: number;
+  guideVisible?: boolean;
 }

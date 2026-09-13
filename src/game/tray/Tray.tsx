@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { PuzzleSession } from "../puzzle-core/session";
 import type { PieceGeometry, PuzzleGeometry } from "../puzzle-core/types";
+import { Icon } from "../../ui/Icon";
 
 export function PiecePreview({
   piece,
@@ -95,8 +96,8 @@ export function Tray({
             setEdges(e.target.checked);
             if (ref.current) ref.current.scrollTop = 0;
           }}
-        />{" "}
-        Только края
+        />
+        <Icon name="puzzle" size={14} /> Только края
       </label>
       <div
         className="tray-scroll"
@@ -125,7 +126,6 @@ export function Tray({
             </button>
           ))}
         </div>
-        {ids.length === 0 && <p className="tray-empty">Все детали на столе</p>}
       </div>
     </aside>
   );

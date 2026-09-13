@@ -52,9 +52,25 @@ export function parseSave(raw: string | null): SaveGame | undefined {
           Number.isFinite(p.y) &&
           Math.abs(p.x) < 1e7 &&
           Math.abs(p.y) < 1e7 &&
-          ["tray", "board", "placed"].includes(p.location),
+          ["tray", "board", "placed"].includes(p.location) &&
+          (p.rotation === undefined ||
+            (Number.isInteger(p.rotation) &&
+              p.rotation >= 0 &&
+              p.rotation <= 3)) &&
+          (p.rotatable === undefined || typeof p.rotatable === "boolean") &&
+          (!(p.rotation ?? 0) ||
+            (p.rotatable === true && p.location === "board")),
       )
     )
+      return;
+    if (
+      s.hintOpacity !== undefined &&
+      (!Number.isFinite(s.hintOpacity) ||
+        s.hintOpacity < 0 ||
+        s.hintOpacity > 1)
+    )
+      return;
+    if (s.guideVisible !== undefined && typeof s.guideVisible !== "boolean")
       return;
     // Installed pieces always restore to canonical coordinates, never trust saved positions.
     const cellHeight =

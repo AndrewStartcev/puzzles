@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { generatePuzzle, contains } from "../src/game/puzzle-core/geometry";
+import {
+  generatePuzzle,
+  contains,
+  random,
+} from "../src/game/puzzle-core/geometry";
+import { pieceLocal } from "../src/game/puzzle-core/rotation";
 import { PuzzleSession } from "../src/game/puzzle-core/session";
 import { parseSave } from "../src/game/save/save";
 import { screenToWorld, zoomAt } from "../src/game/camera/camera";
@@ -79,6 +84,59 @@ describe("procedural geometry", () => {
   });
 });
 describe("session and saving", () => {
+  it.each([12, 300, 3000])(
+    "scatters %i loose pieces within the board and preserves installed pieces",
+    (count) => {
+      const session = new PuzzleSession(
+        generatePuzzle({ ...config, requestedCount: count }),
+      );
+      session.drop(0, 0, 0, 1);
+      const installed = { ...session.states[0] };
+      session.scatter(random(31));
+      expect(session.states[0]).toEqual(installed);
+      const area = session.workspace,
+        g = session.geometry;
+      let valid = true;
+      for (const p of session.states.slice(1))
+        valid &&=
+          p.location === "board" &&
+          p.rotatable === true &&
+          p.rotation! >= 0 &&
+          p.rotation! <= 3 &&
+          p.x > area.x &&
+          p.y > area.y &&
+          p.x + g.cellWidth < area.x + area.width &&
+          p.y + g.cellHeight < area.y + area.height;
+      expect(valid).toBe(true);
+    },
+  );
+  it("allows click rotation only after scattering and snaps only at zero rotation", () => {
+    const s = new PuzzleSession(generatePuzzle(config));
+    expect(s.rotate(0)).toBe(false);
+    s.drop(0, 200, 200, 1);
+    expect(s.rotate(0)).toBe(false);
+    s.scatter(random(9));
+    s.states[0].rotation = 1;
+    expect(s.drop(0, 0, 0, 1)).toBe(false);
+    for (let i = 0; i < 3; i++) expect(s.rotate(0)).toBe(true);
+    expect(s.states[0].rotation).toBe(0);
+    expect(s.drop(0, 0, 0, 1)).toBe(true);
+    expect(s.rotate(0)).toBe(false);
+  });
+  it("transforms hit tests around a rotated non-square piece centre", () => {
+    const g = generatePuzzle(config),
+      state = { id: 0, x: 50, y: 70, rotation: 1, location: "board" as const };
+    const local = { x: 20, y: 30 },
+      cx = g.cellWidth / 2,
+      cy = g.cellHeight / 2;
+    const world = {
+      x: state.x + cx - (local.y - cy),
+      y: state.y + cy + (local.x - cx),
+    };
+    const actual = pieceLocal(state, world, g);
+    expect(actual.x).toBeCloseTo(local.x);
+    expect(actual.y).toBeCloseTo(local.y);
+  });
   it("snaps nearby pieces, leaves distant pieces free, locks placed pieces", () => {
     const s = new PuzzleSession(generatePuzzle(config));
     expect(s.drop(0, 200, 200, 1)).toBe(false);
@@ -110,6 +168,27 @@ describe("session and saving", () => {
       parseSave(JSON.stringify({ ...save, camera: { x: 0, y: 0, zoom: 0 } })),
     ).toBeUndefined();
     expect(JSON.stringify(save)).not.toContain("points");
+    session.scatter(random(6));
+    const rotatedSave = {
+      ...save,
+      pieces: session.states,
+      hintOpacity: 0.62,
+      guideVisible: true,
+    };
+    const parsed = parseSave(JSON.stringify(rotatedSave))!;
+    expect(parsed.hintOpacity).toBe(0.62);
+    expect(parsed.pieces).toEqual(session.states);
+    expect(
+      parseSave(JSON.stringify({ ...rotatedSave, hintOpacity: 2 })),
+    ).toBeUndefined();
+    expect(
+      parseSave(
+        JSON.stringify({
+          ...rotatedSave,
+          pieces: session.states.map((p) => ({ ...p, rotation: 9 })),
+        }),
+      ),
+    ).toBeUndefined();
   });
   it("keeps the world point beneath the zoom anchor", () => {
     const camera = { x: 20, y: 30, zoom: 0.7 },

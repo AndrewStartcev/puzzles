@@ -3,17 +3,7 @@ import { catalog, difficulties, type PuzzleContent } from "../content/catalog";
 import { generatePuzzle } from "../game/puzzle-core/geometry";
 import type { SaveGame, PuzzleGeometry } from "../game/puzzle-core/types";
 import type { GameRequest } from "./PuzzleGame";
-
-function PuzzleMark() {
-  return (
-    <svg viewBox="0 0 32 32" aria-hidden="true">
-      <path
-        d="M5 7h7c-2-7 10-7 8 0h7v7c7-2 7 10 0 8v7h-7c2-7-10-7-8 0H5v-7c7 2 7-10 0-8Z"
-        fill="currentColor"
-      />
-    </svg>
-  );
-}
+import { Icon } from "./Icon";
 
 function PaperDialog({
   children,
@@ -66,7 +56,7 @@ function PaperDialog({
           aria-label="Закрыть"
           onClick={close}
         >
-          ×
+          <Icon name="close" />
         </button>
         {children}
       </section>
@@ -208,7 +198,7 @@ export function Lobby({
       <header className="lobby-hud">
         <div className="mini-brand">
           <span className="brand-token">
-            <PuzzleMark />
+            <Icon name="puzzle" />
           </span>
           <span>МИР ПАЗЛОВ</span>
         </div>
@@ -224,7 +214,7 @@ export function Lobby({
             title="Полный экран"
             onClick={() => void fullscreen()}
           >
-            ⛶
+            <Icon name="fullscreen" />
           </button>
           <button
             className="round-button"
@@ -232,7 +222,7 @@ export function Lobby({
             title="Настройки"
             onClick={() => setSettings(true)}
           >
-            ⚙
+            <Icon name="settings" />
           </button>
         </div>
       </header>
@@ -250,7 +240,7 @@ export function Lobby({
                 setNoticeDismissed(true);
               }}
             >
-              ×
+              <Icon name="close" />
             </button>
           </div>
         )}
@@ -277,7 +267,7 @@ export function Lobby({
                     }
                   >
                     <span className="button-symbol" aria-hidden="true">
-                      ▶
+                      <Icon name="play" />
                     </span>
                     <span>
                       Продолжить
@@ -286,7 +276,7 @@ export function Lobby({
                       </small>
                     </span>
                     <span className="button-arrow" aria-hidden="true">
-                      ›
+                      <Icon name="next" />
                     </span>
                   </button>
                 )}
@@ -297,11 +287,11 @@ export function Lobby({
                   onClick={() => setSelection(first)}
                 >
                   <span className="button-symbol" aria-hidden="true">
-                    {resumable ? "+" : "▶"}
+                    <Icon name={resumable ? "plus" : "play"} />
                   </span>
                   <span>{resumable ? "Новый пазл" : "Играть"}</span>
                   <span className="button-arrow" aria-hidden="true">
-                    ›
+                    <Icon name="next" />
                   </span>
                 </button>
                 <button
@@ -309,16 +299,13 @@ export function Lobby({
                   onClick={() => setScreen("collections")}
                 >
                   <span className="button-symbol" aria-hidden="true">
-                    <PuzzleMark />
+                    <Icon name="puzzle" />
                   </span>
                   <span>Коллекции</span>
                   <span className="button-arrow" aria-hidden="true">
-                    ›
+                    <Icon name="next" />
                   </span>
                 </button>
-              </div>
-              <div className="menu-note">
-                <span>✧</span> Без спешки. В вашем темпе.
               </div>
             </section>
             <section className="puzzle-display">
@@ -352,7 +339,7 @@ export function Lobby({
                 aria-label="Главное меню"
                 onClick={() => setScreen("home")}
               >
-                ←
+                <Icon name="back" />
               </button>
               <div>
                 <span className="menu-kicker">ВАША ПОЛКА</span>
@@ -373,14 +360,16 @@ export function Lobby({
                     <div className="card-art">
                       <img src={content.image} alt="" loading="lazy" />
                       <span className="card-piece-count">
-                        <PuzzleMark />
+                        <Icon name="puzzle" />
                         12–3000
                       </span>
                     </div>
                     <div className="card-caption">
                       <small>{content.collection}</small>
                       <h2>{content.title}</h2>
-                      <span className="card-play">▶</span>
+                      <span className="card-play">
+                        <Icon name="play" />
+                      </span>
                     </div>
                   </button>
                 ))}
@@ -389,7 +378,6 @@ export function Lobby({
             </div>
           </section>
         )}
-        <div className="mat-stitch" aria-hidden="true" />
       </main>
       {selection && (
         <PaperDialog
@@ -433,7 +421,10 @@ export function Lobby({
                 className="start-button primary"
                 onClick={() => start({ content: selection, count })}
               >
-                Собирать пазл <span>▶</span>
+                Собирать пазл{" "}
+                <span>
+                  <Icon name="play" />
+                </span>
               </button>
             </div>
           </div>
@@ -445,7 +436,9 @@ export function Lobby({
             <span className="menu-kicker">УСТРАИВАЙТЕСЬ ПОУДОБНЕЕ</span>
             <h2>Настройки</h2>
             <div className="settings-row">
-              <span className="settings-symbol">✓</span>
+              <span className="settings-symbol">
+                <Icon name="check" />
+              </span>
               <div>
                 <strong>Автосохранение</strong>
                 <p>
@@ -455,7 +448,9 @@ export function Lobby({
               </div>
             </div>
             <div className="settings-row">
-              <span className="settings-symbol">↔</span>
+              <span className="settings-symbol">
+                <Icon name="fullscreen" />
+              </span>
               <div>
                 <strong>Управление столом</strong>
                 <p>

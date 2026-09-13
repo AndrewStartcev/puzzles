@@ -10,6 +10,7 @@ import { SAVE_KEY } from "../game/save/save";
 import { Tray } from "../game/tray/Tray";
 import type { PlatformAdapter } from "../platform/types";
 import type { PuzzleRenderer } from "../game/renderer/PuzzleRenderer";
+import { Icon } from "./Icon";
 
 export interface GameRequest {
   content: PuzzleContent;
@@ -34,6 +35,24 @@ export function PuzzleGame({
   const [error, setError] = useState(""),
     [status, setStatus] = useState("Подготовка деталей…");
   const [seconds, setSeconds] = useState(request.save?.elapsedSeconds ?? 0);
+  const [hintOpacity, setHintOpacity] = useState(
+    request.save?.hintOpacity ?? 0.14,
+  );
+  const [referenceOpen, setReferenceOpen] = useState(false);
+  const referenceClose = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!referenceOpen) return;
+    const previous = document.activeElement as HTMLElement;
+    referenceClose.current?.focus();
+    const close = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setReferenceOpen(false);
+    };
+    window.addEventListener("keydown", close);
+    return () => {
+      window.removeEventListener("keydown", close);
+      previous?.focus();
+    };
+  }, [referenceOpen]);
   const elapsed = useRef(seconds),
     persist = useRef<() => void>(() => {});
   useEffect(() => {
@@ -53,6 +72,7 @@ export function PuzzleGame({
         pieces: engine.snapshotStates(),
         elapsedSeconds: elapsed.current,
         updatedAt: Date.now(),
+        ...engine.getHint(),
       };
       try {
         platform.flush(SAVE_KEY, JSON.stringify(save));
@@ -80,6 +100,10 @@ export function PuzzleGame({
         renderer.current = engine;
         await engine.init(request.content.image, request.save?.camera);
         if (disposed) return;
+        engine.setHint(
+          request.save?.hintOpacity ?? 0.14,
+          request.save?.guideVisible ?? true,
+        );
         setSession(s);
         setStatus("Готово");
         platform.ready();
@@ -168,7 +192,7 @@ export function PuzzleGame({
             back();
           }}
         >
-          ← Меню
+          <Icon name="back" size={20} /> Меню
         </button>
         <div>
           <h2>{request.content.title}</h2>
@@ -187,6 +211,36 @@ export function PuzzleGame({
           </span>
         </div>
       </header>
+      <div className="board-toolbar">
+        <button
+          disabled={!session || placed === count}
+          onClick={() => renderer.current?.scatter()}
+        >
+          <Icon name="scatter" size={20} />
+          Раскидать пазлы
+        </button>
+        <button disabled={!session} onClick={() => setReferenceOpen(true)}>
+          <Icon name="image" size={20} />
+          Показать макет
+        </button>
+        <label className="hint-control">
+          <Icon name="image" size={18} />
+          <span>Подсказка</span>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={Math.round(hintOpacity * 100)}
+            aria-label="Прозрачность подсказки"
+            onChange={(event) => {
+              const value = Number(event.target.value) / 100;
+              setHintOpacity(value);
+              renderer.current?.setHint(value, true);
+            }}
+          />
+          <output>{Math.round(hintOpacity * 100)}%</output>
+        </label>
+      </div>
       <div className="workspace">
         <div className="board-wrap">
           <div className="board" ref={host} />
@@ -207,19 +261,28 @@ export function PuzzleGame({
               aria-label="Уменьшить"
               onClick={() => renderer.current?.zoom(1 / 1.25)}
             >
-              −
+              <Icon name="minus" size={18} />
             </button>
             <button onClick={() => renderer.current?.fit()}>Весь пазл</button>
+            <button
+              title="Вся доска"
+              aria-label="Вся доска"
+              onClick={() => renderer.current?.fitWorkspace()}
+            >
+              <Icon name="fullscreen" size={18} />
+            </button>
             <button
               aria-label="Увеличить"
               onClick={() => renderer.current?.zoom(1.25)}
             >
-              +
+              <Icon name="plus" size={18} />
             </button>
           </div>
           {count > 0 && placed === count && (
             <div className="completion" role="status">
-              <span>✦</span>
+              <span>
+                <Icon name="trophy" size={46} />
+              </span>
               <h2>Картина собрана!</h2>
               <p>Ещё одно открытие в вашем мире.</p>
               <button onClick={back}>В меню</button>
@@ -235,13 +298,39 @@ export function PuzzleGame({
           />
         )}
       </div>
-      <footer className="game-footer">
-        <span>
-          Перенесите детали на стол · Колесо — масштаб · Свободное место —
-          перемещение · F — весь пазл
-        </span>
-        <span aria-live="polite">{status}</span>
-      </footer>
+      <span className="sr-only" aria-live="polite">
+        {status}
+      </span>
+      {status.startsWith("Сохранение недоступно") && (
+        <div className="save-error" role="alert">
+          {status}
+        </div>
+      )}
+      {referenceOpen && (
+        <div className="modal-backdrop" onClick={() => setReferenceOpen(false)}>
+          <section
+            className="reference-sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Макет пазла"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              ref={referenceClose}
+              className="round-button"
+              aria-label="Закрыть макет"
+              onClick={() => setReferenceOpen(false)}
+              onKeyDown={(event) => {
+                if (event.key === "Tab") event.preventDefault();
+              }}
+            >
+              <Icon name="close" />
+            </button>
+            <img src={request.content.image} alt={request.content.title} />
+            <h2>{request.content.title}</h2>
+          </section>
+        </div>
+      )}
     </section>
   );
 }
